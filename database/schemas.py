@@ -17,6 +17,7 @@ class Task(TaskBase):
     id: int
     status: str
     creation_time: datetime
+    finish_time: Optional[datetime]
     user_id: int
 
     class Config:

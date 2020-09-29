@@ -27,6 +27,7 @@ def get_db():
 
 @app.put("/task/create")
 def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
+    """Создаёт новую задачу, либо возвращает ошибку сервера"""
     task = users.create_task(db, task, user.id)
     if not task:
         raise HTTPException(
@@ -40,6 +41,7 @@ def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), 
 
 @app.put("/task/update")
 def update_task(task: Task, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
+    """Обновляет поля задачи, либо возвращает 404, если задача не найдена"""
     result = crud.update_task(db, task)
     if not result:
         raise HTTPException(
@@ -53,6 +55,7 @@ def update_task(task: Task, user: User = Depends(users.get_current_user), db: Se
 
 @app.delete("/task/delete")
 def delete_task(task_id: int, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
+    """Удаляет задачу по её id, либо возвращает 404, если задача не найдена"""
     result = crud.delete_task(db, task_id=task_id)
     if not result:
         raise HTTPException(
@@ -66,16 +69,19 @@ def delete_task(task_id: int, user: User = Depends(users.get_current_user), db: 
 
 @app.post("/user/tasks")
 def read_tasks(db: Session = Depends(get_db), user: User = Depends(users.get_current_user)):
+    """Возвращает все задачи для текущего пользователя"""
     return crud.get_tasks(db, user.id)
 
 
 @app.post("/user/create")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    """Создаёт нового пользователя"""
     return users.perform_registration(db, user)
 
 
 @app.post("/login")
 def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+    """Авторизирует пользователя и возвращает токен, либо возвращает ошибку 401"""
     user = users.authenticate_user(db, form_data.username, form_data.password)
 
     if not user:
@@ -91,7 +97,3 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
