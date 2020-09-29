@@ -38,11 +38,12 @@ def create_task(db: Session, task: schemas.TaskCreate, user_id: int):
     return task
 
 
-def update_task(db: Session, task: schemas.Task):
+def update_task(db: Session, task: schemas.TaskCreate):
     db_task = db.query(models.Task).filter(models.Task.id == task.id)
-    if not db_task:
+    if not db_task.first():
         return False
 
+    _save_task_changes(db, db_task.first())
     db_task.update(task)
     db.commit()
 
@@ -58,3 +59,18 @@ def delete_task(db: Session, task_id: int):
     db.commit()
 
     return True
+
+
+def get_history(db: Session, task_id: int):
+    return db.query(models.Change).filter(models.Change.task_id == task_id).all()
+
+
+def _save_task_changes(db: Session, task: schemas.Task):
+    db_change = models.Change(title=task.title,
+                              description=task.description,
+                              creation_time=task.creation_time,
+                              status=task.status,
+                              task_id=task.id)
+    db.add(db_change)
+    db.commit()
+    db.refresh(db_change)

@@ -40,7 +40,7 @@ def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), 
 
 
 @app.put("/task/update")
-def update_task(task: Task, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
+def update_task(task: TaskCreate, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
     """Обновляет поля задачи, либо возвращает 404, если задача не найдена"""
     result = crud.update_task(db, task)
     if not result:
@@ -51,6 +51,12 @@ def update_task(task: Task, user: User = Depends(users.get_current_user), db: Se
         )
 
     return {"status_code": status.HTTP_200_OK}
+
+
+@app.post("/task/history")
+def get_task_history(task_id: int, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
+    """Возвращает историю изменений задачи"""
+    return crud.get_history(db, task_id)
 
 
 @app.delete("/task/delete")

@@ -20,4 +20,16 @@ class Task(Base):
     creation_time = Column(DateTime)
     finish_time = Column(DateTime, nullable=True, default=None)
     status = Column(String)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+
+
+class Change(Base):
+    __tablename__ = "history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    description = Column(String, index=True)
+    creation_time = Column(DateTime)
+    finish_time = Column(DateTime, nullable=True, default=None)
+    status = Column(String)
+    task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"))

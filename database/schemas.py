@@ -5,20 +5,26 @@ from pydantic import BaseModel
 
 
 class TaskBase(BaseModel):
+    id: int
     title: str
     description: Optional[str] = None
 
 
 class TaskCreate(TaskBase):
-    pass
+    status: str
+    finish_time: Optional[datetime] = None
 
 
 class Task(TaskBase):
-    id: int
-    status: str
     creation_time: datetime
-    finish_time: Optional[datetime]
     user_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class TaskChange(Task):
+    task_id: int
 
     class Config:
         orm_mode = True
