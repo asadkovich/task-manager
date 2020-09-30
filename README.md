@@ -1,7 +1,7 @@
 # task-manager
 FastApi based task manger
 
-### Перменные окружения:
+### Переменные окружения:
 ```
 POSTGRES_USER
 POSTGRES_PASSWORD
