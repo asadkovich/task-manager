@@ -1,6 +1,15 @@
 # task-manager
 FastApi based task manger
 
+### Перменные окружения:
+```
+POSTGRES_USER
+POSTGRES_PASSWORD
+POSTGRES_DB
+SECRET_KEY
+```
+Расположить в файле .env в корне проекта
+
 ### Запуск:
 ```
 docker-compose up --build
