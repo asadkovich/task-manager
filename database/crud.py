@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from . import models, schemas
-from auth import services
+from services import services
 
 
 def get_user(db: Session, login: str):
@@ -29,7 +29,7 @@ def create_task(db: Session, task: schemas.TaskCreate, user_id: int):
     db_task = models.Task(title=task.title,
                           description=task.description,
                           creation_time=datetime.now(),
-                          status="new",
+                          status=task.status,
                           user_id=user_id)
     db.add(db_task)
     db.commit()
@@ -38,8 +38,8 @@ def create_task(db: Session, task: schemas.TaskCreate, user_id: int):
     return task
 
 
-def update_task(db: Session, task: schemas.TaskCreate):
-    db_task = db.query(models.Task).filter(models.Task.id == task.id)
+def update_task(db: Session, task_id, task: schemas.TaskCreate):
+    db_task = db.query(models.Task).filter(models.Task.id == task_id)
     if not db_task.first():
         return False
 

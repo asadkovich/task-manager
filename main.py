@@ -1,14 +1,13 @@
 from datetime import timedelta
 
-import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from auth import users
+from services import users, services
 from database import models, crud
 from database.db import SessionLocal, engine
-from database.schemas import UserCreate, TaskCreate, User, Task
+from database.schemas import UserCreate, TaskCreate, User
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -27,7 +26,18 @@ def get_db():
 
 @app.put("/task/create")
 def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
-    """Создаёт новую задачу, либо возвращает ошибку сервера"""
+    """Создаёт новую задачу, либо возвращает ошибку:
+        400, если данные задачи некорректны
+        500, если возникла проблема при сохранении
+    """
+    validation = services.validate_task(task)
+    if not validation["valid"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=validation["detail"],
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
     task = users.create_task(db, task, user.id)
     if not task:
         raise HTTPException(
@@ -40,9 +50,23 @@ def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), 
 
 
 @app.put("/task/update")
-def update_task(task: TaskCreate, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
-    """Обновляет поля задачи, либо возвращает 404, если задача не найдена"""
-    result = crud.update_task(db, task)
+def update_task(task_id: int,
+                task: TaskCreate,
+                user: User = Depends(users.get_current_user),
+                db: Session = Depends(get_db)):
+    """Обновляет поля задачи, либо возвращает ошибку:
+        404, если задача не найдена
+        400, если данные задачи некорректны
+    """
+    validation = services.validate_task(task)
+    if not validation["valid"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=validation["detail"],
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    result = crud.update_task(db, task_id, task)
     if not result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

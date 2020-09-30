@@ -5,17 +5,17 @@ from pydantic import BaseModel
 
 
 class TaskBase(BaseModel):
-    id: int
     title: str
     description: Optional[str] = None
+    status: str = "new"
 
 
 class TaskCreate(TaskBase):
-    status: str
     finish_time: Optional[datetime] = None
 
 
 class Task(TaskBase):
+    id: int
     creation_time: datetime
     user_id: int
 
