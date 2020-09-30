@@ -59,7 +59,7 @@ def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), 
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    return {"status_code": status.HTTP_201_CREATED}
+    return task
 
 
 @app.put("/task/update")
@@ -87,8 +87,6 @@ def update_task(task_id: int,
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    return {"status_code": status.HTTP_200_OK}
-
 
 @app.post("/task/history")
 def get_task_history(task_id: int, user: User = Depends(users.get_current_user), db: Session = Depends(get_db)):
@@ -106,8 +104,6 @@ def delete_task(task_id: int, user: User = Depends(users.get_current_user), db: 
             detail="task not found",
             headers={"WWW-Authenticate": "Bearer"}
         )
-
-    return {"status_code": status.HTTP_200_OK}
 
 
 @app.post("/user/tasks")
