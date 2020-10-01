@@ -49,9 +49,10 @@ def perform_registration(db: Session, user: UserCreate) -> dict:
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    user.password = _get_password_hash(user.password)
     new_user = crud.create_user(db, user)
 
-    return {"status_code": status.HTTP_200_OK}
+    return new_user
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -106,3 +107,7 @@ def _validate_data(db: Session, login: str) -> dict:
 
 def _verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
+
+
+def _get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)

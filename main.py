@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from services import users, services
+from auth import users
 from database import models, crud
 from database.db import SessionLocal, engine
 from database.schemas import UserCreate, TaskCreate, User
@@ -43,14 +43,6 @@ def create_task(task: TaskCreate, user: User = Depends(users.get_current_user), 
         400, если данные задачи некорректны
         500, если возникла проблема при сохранении
     """
-    validation = services.validate_task(task)
-    if not validation["valid"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=validation["detail"],
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
     task = users.create_task(db, task, user.id)
     if not task:
         raise HTTPException(
@@ -71,14 +63,6 @@ def update_task(task_id: int,
         404, если задача не найдена
         400, если данные задачи некорректны
     """
-    validation = services.validate_task(task)
-    if not validation["valid"]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=validation["detail"],
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
     result = crud.update_task(db, task_id, task)
     if not result:
         raise HTTPException(

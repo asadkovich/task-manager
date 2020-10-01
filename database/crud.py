@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 
 from . import models, schemas
-from services import services
 
 
 def get_user(db: Session, login: str):
@@ -11,7 +10,7 @@ def get_user(db: Session, login: str):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    hashed_password = services.get_password_hash(user.password)
+    hashed_password = user.password
 
     db_user = models.User(login=user.login, password=hashed_password)
     db.add(db_user)

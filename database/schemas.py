@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class TaskBase(BaseModel):
@@ -12,6 +12,18 @@ class TaskBase(BaseModel):
 
 class TaskCreate(TaskBase):
     finish_time: Optional[datetime] = None
+
+    @validator("title")
+    def title_is_empty(cls, v):
+        if len(v) == 0:
+            raise ValueError("Title is empty")
+        return v.title()
+
+    @validator("status")
+    def invalid_status(cls, v):
+        if v not in ("new", "planned", "in progress", "finished"):
+            raise ValueError("Status is invalid")
+        return v.title()
 
 
 class Task(TaskBase):
